@@ -1,0 +1,7 @@
+# Arquivos inúteis do macOS
+.DS_Store
+
+# Configurações locais do Obsidian
+.obsidian/
+.obsidian-workspace
+.obsidian-*
