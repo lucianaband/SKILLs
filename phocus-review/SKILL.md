@@ -1,7 +1,7 @@
 ---
 name: phocus-review
 description: >
-  Revisão de conformidade de um projeto Phocus: lê o PRD, percorre cada skill apontada pelo phocus-app-guide (/spec, /break, /plan, /architecture, brand-phocus, /docs, /execute) e verifica se o output esperado de cada uma existe e está correto — tanto em documentação quanto no código implementado. Entrega um relatório estruturado com status por dimensão. Use quando o usuário disser "/review", "revisa o projeto", "bate com o PRD", "confere a spec", "o que está faltando", "está tudo implementado", "revisão de conformidade", ou ao final de uma rodada de desenvolvimento antes de avançar para o próximo módulo.
+  Revisão de conformidade de um projeto Phocus: lê o PRD, percorre cada skill apontada pelo phocus-app-guide (/spec, /break, /plan, /architecture, brand-phocus, /docs, /execute) e verifica se o output esperado de cada uma existe e está correto — tanto em documentação quanto no código implementado. Inclui também uma checagem de deploy readiness (pipeline Dokku/herokuish) cobrindo NODE_OPTIONS, sincronia do lockfile com npm 10, sobrevivência ao prune do release, e peso do install. Entrega um relatório estruturado com status por dimensão. Use quando o usuário disser "/review", "revisa o projeto", "bate com o PRD", "confere a spec", "o que está faltando", "está tudo implementado", "revisão de conformidade", "está pronto para deploy", ou ao final de uma rodada de desenvolvimento antes de avançar para o próximo módulo ou subir um deploy.
 ---
 
 # Phocus Review — Revisão de Conformidade
@@ -164,6 +164,53 @@ Para cada regra em "Regras de Negócio Críticas" da spec, confirmar onde está 
 
 ---
 
+## Dimensão 8 — Deploy readiness (pipeline Dokku/herokuish)
+
+Apps Phocus rodam no Dokku via `dokku/github-action@master`, em `deploy.phocus.mxmz.app`, com pipeline herokuish: `npm install` → `npm run build` → `npm prune --production` → release hook (Procfile). Quatro armadilhas já queimaram apps reais. Esta dimensão checa se o projeto está livre delas **antes** de subir um deploy.
+
+**8.1 — NODE_OPTIONS no script `build`**
+- [ ] O script `build` em `package.json` **NÃO** sobrescreve `NODE_OPTIONS` com valor menor que o do Dokku.
+- ❌ Sinal de problema: `"build": "... cross-env NODE_OPTIONS=--max-old-space-size=512 next build"` ou similar com valor abaixo de 2048.
+- ✅ Esperado: `"build": "prisma generate && next build"` — herda os `4096MB` que o Dokku injeta globalmente.
+- **Por quê:** sobrescrever para baixo faz o `tsc` do Next morrer silenciosamente no step "Running TypeScript ..." sem imprimir erro algum. Build local passa, Dokku falha sem mensagem.
+
+**8.2 — Sincronia do `package-lock.json` com npm 10**
+- [ ] O `package-lock.json` está sincronizado com `package.json` quando avaliado por **npm 10** (não apenas npm 11+).
+- **Como checar:** rodar `npx -y npm@10 ci --dry-run` na raiz do app. Deve completar sem erro "npm lockfile is not in sync".
+- ❌ Sinal de problema: build no Dokku falha com `npm lockfile is not in sync` ou `This error occurs when the contents of package.json contains a different set of dependencies that the contents of package-lock.json`.
+- ✅ Esperado: lockfile gerado/atualizado com `npx -y npm@10 install --package-lock-only` antes de commitar.
+- **Por quê:** o Dokku honra `engines.npm: "10.x"` e usa npm 10. Lockfiles tocados por npm 11 localmente passam local mas o `npm ci` do Dokku rejeita.
+
+**8.3 — Runners de release sobrevivem ao prune de devDependencies**
+- [ ] Qualquer ferramenta usada pelo release hook (Procfile `release:` ou `scripts/deploy/release.sh`) está em `dependencies`, não em `devDependencies`.
+- **Como checar:**
+  1. Ler `Procfile` e qualquer `release*.sh` referenciado.
+  2. Listar todos os binários invocados (`npx <tool>`, comandos diretos).
+  3. Para cada um, conferir se está em `dependencies` do `package.json`.
+- ❌ Sinal de problema: `npx ts-node prisma/backfill-*.ts` ou similar com `ts-node` em devDependencies → erro `Cannot find name 'process'` (porque `@types/node` foi pruned).
+- ✅ Esperado: usar `tsx` (em `dependencies`) — runner único de ~5MB sem dependência de `@types/node` em runtime.
+- **Por quê:** o pipeline herokuish faz `npm prune --production` ANTES do release hook. devDependencies somem nesse momento.
+
+**8.4 — Peso do `npm install` no Dokku**
+- [ ] Não há dependências pesadas desnecessárias em `dependencies`.
+- **Sinal de problema no log do Dokku:** `monitor.sh: line 3: NNNN Killed` durante "Installing node modules" → OOM no install.
+- ❌ Não-recomendado: `ts-node` em `dependencies` (puxa typescript + @types/node, ~120MB combinado).
+- ✅ Esperado: usar `tsx` para scripts `.ts` em runtime. Outros pacotes pesados (`@react-pdf/renderer`, etc.) só ficam em `dependencies` se realmente usados em runtime.
+- **Por quê:** o container do Dokku tem RAM limitada. Combinação de dependências pesadas faz o install ser OOM-killed.
+
+**Como verificar tudo de uma vez (atalho):**
+```
+# Dentro da pasta do app
+grep -E '"build":' package.json                              # 8.1
+npx -y npm@10 ci --dry-run                                   # 8.2
+cat Procfile && cat scripts/deploy/release.sh                 # 8.3 (listar runners)
+grep -A 20 '"dependencies"' package.json | grep -E 'ts-node|tsx'  # 8.3 e 8.4
+```
+
+Se o app não tem release hook (`Procfile` só com `web:`), 8.3 vira N/A.
+
+---
+
 ## Formato do relatório
 
 Entregue sempre nesta estrutura, uma seção por dimensão:
@@ -200,6 +247,10 @@ Data: [data atual]
 [tabela: Funcionalidade | Status | O que falta]
 [tabela: Regra de negócio | Onde está no código | Status]
 [lista: Padrões técnicos ✅/⚠️/❌]
+
+### Dimensão 8 — Deploy readiness
+[lista: 8.1 NODE_OPTIONS | 8.2 lockfile npm 10 | 8.3 release runners | 8.4 peso do install — cada um ✅/⚠️/❌]
+[Se ❌: bloquear deploy e indicar como corrigir]
 
 ---
 
