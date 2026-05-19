@@ -51,6 +51,19 @@ Estes padrões se aplicam a **todos os apps** da Phocus, sem exceção. Não per
   - `404 Not Found` — recurso não existe
   - `500 Internal Server Error` — erro inesperado no servidor
 
+### Componentes de Interface Padrão — phocus-components
+
+Todo app Phocus com área autenticada usa os mesmos componentes de base. **Não reinvente — reutilize.**
+
+Se o app tiver **login**, inclua automaticamente na spec:
+- **Sidebar + Layout** (`app/(dashboard)/layout.tsx`) — menu lateral escuro com logo branca, nav dinâmico por perfil, UserButton Clerk
+- **Gestão de Usuários** (`app/(dashboard)/admin/usuarios/`) — para apps com múltiplos perfis de acesso
+
+Se o app for **interno da agência** (campanhas, planejamento, relatórios, checklists), inclua também:
+- **Gestão de Clientes** (`app/(dashboard)/clientes/`) — CRUD de carteira de clientes da agência
+
+> O skill `/components` entrega o código pronto desses três módulos com API routes e schema Prisma incluídos. Mencione no Prompt Inicial de Vibe Coding que o Claude Code deve usar `/components` ao implementar esses módulos — não codá-los do zero.
+
 ---
 
 ## Passo 2 — Faça a Entrevista Rápida
@@ -180,6 +193,7 @@ IA, vamos construir o **[Nome do App]**.
 - Banco de dados exclusivamente via **Prisma ORM**, escondido atrás do padrão **Repository**. A camada de domínio não importa Prisma diretamente.
 - Autenticação via **Clerk** com validação de sessão em middleware centralizado — não inline por rota.
 - APIs estritamente **RESTful**: verbos HTTP corretos, URLs orientadas a recurso (`/recursos/id/sub-recursos`), status codes semânticos (`200`, `201`, `400`, `401`, `403`, `404`, `500`).
+- Sidebar, Clientes e Usuários: use o skill `/components` para obter o código padrão Phocus — não implemente do zero.
 
 **Comece por:**
 1. Schema Prisma + migrations (tabelas: [listar principais])
@@ -210,29 +224,4 @@ Liste 3-5 critérios objetivos e verificáveis.]
 Depois de gerar a spec:
 
 1. **Salve em dois lugares:**
-   - `planning/spec-[nome-do-app].md` — arquivo de trabalho da metodologia
-   - `docs/SPEC.md` — referência permanente do projeto (lida pelo Claude Code)
-   - Se as pastas não existirem, criá-las
-2. **Avise** se fez suposições — liste quais foram e por quê
-3. **Oriente** o próximo passo:
-
-```
-✅ Spec salva em planning/ e docs/
-
-Próximos passos do Phocus App Guide:
-  → /break  — dividir o app em módulos de desenvolvimento
-  → /architecture  — documentar arquitetura e padrões
-  → /docs  — gerar CLAUDE.md e WORKFLOW.md
-```
-
----
-
-## Princípios que guiam este skill
-
-**Precisão > Completude.** Uma spec incompleta mas precisa é melhor que uma spec longa e vaga. O Claude Code lida mal com ambiguidade.
-
-**Lógica antes de visual.** O prompt inicial sempre manda construir a lógica de negócio antes da interface. Isso evita retrabalho.
-
-**Suposições declaradas.** Se algo não estava no PRD e você precisou assumir, diga claramente. Isso permite correção rápida.
-
-**Uma spec por app.** Não misture múltiplos projetos. Cada spec é um arquivo independente.
+   - `planning/spec-[nome-do-app].md

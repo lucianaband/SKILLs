@@ -61,6 +61,22 @@ Criar na **raiz do projeto**. Este arquivo é lido automaticamente pelo Claude C
 > Instruções para o Claude Code operar neste projeto.
 > Leia este arquivo inteiro antes de qualquer ação.
 
+## Protocolo obrigatório antes de qualquer /execute
+
+Este protocolo existe porque o Claude Code abre sessões novas a cada conversa e perde contexto. Sem reorientação ativa, ele começa certo e desvia das regras da SPEC. Siga **sempre**, sem pular passos:
+
+1. **Leia a issue inteira**: abra `issues/<arquivo>.md` e leia da primeira à última linha.
+2. **Releia `docs/SPEC.md`**: vá direto à(s) seção(ões) que cobre(m) a feature da issue — regras de negócio, modelo de dados, perfis envolvidos.
+3. **Releia `docs/ARCHITECTURE.md`**: confirme a camada da issue e a regra de fluxo (Controller → UseCase → Repository).
+4. **Ecoe em 3 bullets, ANTES de escrever qualquer código**:
+   - O que a issue pede (em 1 frase, sem copiar o título)
+   - Qual regra de negócio da SPEC se aplica (cite o trecho)
+   - Qual camada arquitetural toca e qual subagente é o correto
+5. **Aguarde validação do usuário** se houver qualquer ambiguidade entre a issue e a SPEC. Não improvise.
+6. **Só então implemente** — seguindo issue + SPEC + ARCHITECTURE, nessa ordem de autoridade.
+
+Regra de ouro: **a SPEC vence o resumo deste CLAUDE.md**. Este arquivo é um briefing, não a fonte de verdade. Quando em dúvida, abra o `docs/SPEC.md`.
+
 ## Identidade do Projeto
 
 - **Nome:** [Nome do App]

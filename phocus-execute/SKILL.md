@@ -53,6 +53,27 @@ HTTP Response
 
 ---
 
+## Passo 0 — Protocolo de reorientação (OBRIGATÓRIO antes de codar)
+
+Este passo é inegociável. O Claude Code abre sessões novas a cada conversa e perde contexto — sem reorientação ativa, começa certo e desvia das regras da SPEC. **Execute antes de qualquer escrita de código.**
+
+1. **Leia `CLAUDE.md` da raiz do projeto** se ainda não leu nesta sessão. Ele aponta para os docs canônicos e contém o protocolo do projeto.
+2. **Leia a issue inteira** (`issues/<arquivo>.md`) — da primeira à última linha, incluindo alertas e critérios de aceite.
+3. **Releia `docs/SPEC.md`** — vá direto à(s) seção(ões) que cobre(m) a feature da issue. Regras de negócio, modelo de dados, perfis envolvidos.
+4. **Releia `docs/ARCHITECTURE.md`** — confirme a camada da issue e o fluxo (Controller → UseCase → Repository).
+5. **Ecoe ao usuário em 3 bullets, ANTES de escrever qualquer código:**
+   - O que a issue pede (1 frase, sem copiar o título)
+   - Qual regra de negócio da SPEC se aplica (cite o trecho)
+   - Qual camada arquitetural toca e qual subagente do Passo 3 é o correto
+6. **Aguarde validação** se houver qualquer ambiguidade entre issue e SPEC. Não improvise.
+7. **Só então** prossiga para os passos seguintes.
+
+**Regra de ouro:** a SPEC vence o resumo do CLAUDE.md. Em conflito, abra `docs/SPEC.md`.
+
+Se o usuário pular este passo ou pedir para ir direto ao código, lembre-o do protocolo. Ele existe porque, sem ele, o drift sempre volta.
+
+---
+
 ## Passo 1 — Receba a issue
 
 O usuário vai fornecer o arquivo de issue de uma das formas:
@@ -75,10 +96,11 @@ Antes de implementar, confirme:
 
 ```
 ✅ Checklist pré-execução:
+- [ ] Passo 0 (protocolo de reorientação) executado e 3 bullets ecoados ao usuário
 - [ ] git status está limpo (ou usuário fez git commit antes)
 - [ ] A issue anterior foi validada (se houver dependência)
 - [ ] CLAUDE.md existe na raiz do projeto
-- [ ] docs/ARCHITECTURE.md existe e foi lido
+- [ ] docs/SPEC.md e docs/ARCHITECTURE.md existem e foram lidos
 ```
 
 Se `CLAUDE.md` não existir: avise o usuário e sugira rodar `/docs` primeiro.
@@ -277,6 +299,8 @@ Se durante a implementação você encontrar qualquer um destes, **pare** e avis
 ---
 
 ## Princípios que guiam este skill
+
+**Passo 0 não é decorativo.** O protocolo de reorientação no início do skill existe porque sessões novas começam certo e derivam. Sem o eco dos 3 bullets, você está codando no escuro.
 
 **Leia a issue inteira antes de codar.** Metade dos erros vêm de começar sem ler os alertas e critérios de aceite.
 

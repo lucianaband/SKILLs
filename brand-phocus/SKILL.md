@@ -92,10 +92,12 @@ O tom da Phocus é **assertivo e narrativo** — fala com confiança, sem arrog�
 | **Primary (Roxo)** | `#B0A2F9` (Botões, ícones e destaques) |
 | **Success (Verde)** | `#45B577` (Status: Cronograma Viável) |
 | **Warning (Laranja)** | `#EE7D00` (Status: Ajuste Pendente / Inviável) |
+| **Danger (Vermelho)** | `#E53935` (Status: Erro / Ação Destrutiva) |
 | **Dark (Preto)** | `#191818` (Tipografia e Headers) |
 | **Surface (Branco)** | `#F9F9F9` (Fundo geral) |
 
-> O roxo `#B0A2F9` é a cor de acento principal da Phocus Propaganda (botões e detalhes). As cores funcionais Verde e Laranja organizam a viabilidade dos cronogramas.
+> O roxo `#B0A2F9` é a cor de acento principal da Phocus Propaganda (botões e detalhes). As cores funcionais Verde, Laranja e Vermelho organizam a viabilidade e status.
+> **Importante:** Sobre `#B0A2F9` sempre use `#191818`, nunca branco.
 
 ### Logo
 
@@ -193,10 +195,12 @@ O padrão visual da Phocus usa **formas geométricas circulares** — círculos 
 ### Artifact HTML / Interface
 1. Fundo padrão: `#F9F9F9`
 2. Texto: `#191818`
-3. Destaque: `#B0A2F9`
+3. Destaque: `#B0A2F9` (Lembrete: Sobre `#B0A2F9` sempre use `#191818`, nunca branco)
 4. Logo: use o inline SVG branco no header
 5. Fonte headline: Montserrat 900 ou Nunito 900 via Google Fonts
 6. Elementos circulares no background com baixa opacidade
+7. **Sidebars:** Definir explicitamente que sidebars internas usam `#191818` com logo branca.
+8. **Cores CSS:** Nunca usar classes Tailwind de cor hardcoded (ex: `text-gray-*`) — sempre usar `var(--phocus-*)`.
 
 ### Prompt / Briefing de IA
 1. Contextualize brevemente: cliente, objetivo, canal
@@ -231,11 +235,12 @@ O conteúdo do arquivo deve ser exatamente este:
 | `--color-primary` | `#B0A2F9` | Botões, ícones, destaques, links ativos |
 | `--color-success` | `#45B577` | Status viável, confirmações, sucesso |
 | `--color-warning` | `#EE7D00` | Alertas, status pendente ou inviável |
+| `--color-danger` | `#E53935` | Status de erro, exclusão, falhas |
 | `--color-text` | `#191818` | Tipografia principal, headers |
 | `--color-bg` | `#F9F9F9` | Fundo geral da interface |
 | `--color-surface` | `#FFFFFF` | Cards, modais, painéis elevados |
 
-**Regra:** nunca usar outra cor de destaque além do roxo `#B0A2F9`. Verde e laranja são exclusivos para status.
+**Regra:** nunca usar outra cor de destaque além do roxo `#B0A2F9`. Verde, laranja e vermelho são exclusivos para status. Sobre o primário, use sempre texto `#191818`.
 
 ## Tipografia
 
@@ -302,7 +307,10 @@ Após criar o arquivo, informe ao usuário:
 
 ## Checklist antes de entregar
 
-- [ ] Cores corretas? (roxo `#B0A2F9`, verde `#45B577`, laranja `#EE7D00`, preto `#191818`, branco `#F9F9F9`)
+- [ ] Cores corretas? (roxo `#B0A2F9`, verde `#45B577`, laranja `#EE7D00`, vermelho `#E53935`, preto `#191818`, branco `#F9F9F9`)
+- [ ] Tailwind sem cores hardcoded? (uso de `var(--phocus-*)`)
+- [ ] Contraste correto: Texto `#191818` sobre primário `#B0A2F9`?
+- [ ] Sidebars internas configuradas com fundo `#191818` e logo branca?
 - [ ] Logo aplicado na versão correta para o fundo usado? (fundo escuro → `*BRANCA.png`, fundo claro → versão colorida)
 - [ ] Texto direto, sem linguagem corporativa?
 - [ ] Títulos assertivos, não genéricos?
